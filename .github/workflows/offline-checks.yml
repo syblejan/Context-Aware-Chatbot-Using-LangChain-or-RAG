@@ -1,0 +1,21 @@
+name: RAG offline checks
+on:
+  push:
+    paths:
+      - 'app.py'
+      - 'rag_utils.py'
+      - 'tests/**'
+      - '.github/workflows/offline-checks.yml'
+  workflow_dispatch:
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile source files
+        run: python -m py_compile app.py rag_utils.py tests/test_rag_utils.py
+      - name: Run offline unit tests
+        run: python -m unittest discover -s tests -v
