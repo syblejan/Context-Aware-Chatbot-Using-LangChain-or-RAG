@@ -1,0 +1,42 @@
+name: Live Mistral RAG Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-mistral-rag
+  cancel-in-progress: false
+
+jobs:
+  live-rag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Check repository secret
+        env:
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+        run: |
+          if [ -z "$MISTRAL_API_KEY" ]; then
+            echo "::error::Add the MISTRAL_API_KEY repository Actions secret, then run this workflow again."
+            exit 1
+          fi
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Offline checks
+        run: |
+          python -m compileall -q app.py rag_chain.py rag_utils.py scripts tests
+          python -m unittest discover -s tests -v
+      - name: Live retrieval, follow-up and unknown-answer checks
+        env:
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          HF_HUB_DISABLE_PROGRESS_BARS: "1"
+          TOKENIZERS_PARALLELISM: "false"
+        run: python scripts/live_rag_smoke.py

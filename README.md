@@ -54,6 +54,29 @@ python -m unittest discover -s tests -v
 
 Tests validate helper logic without accessing a paid API or launching Streamlit. They do **not** prove that remote embedding/inference calls work.
 
+## Live API smoke test with GitHub Secrets
+
+1. Open repository **Settings → Secrets and variables → Actions → New repository secret**.
+2. Set the name to `MISTRAL_API_KEY` and paste the key into the **Secret** field.
+3. Open **Actions → Live Mistral RAG Test → Run workflow**, choose `main`, and run.
+4. Inspect the live-test step for three PASS/FAIL checks.
+
+This manually triggered workflow uses the same `rag_chain.build_chain` as the app.
+It checks the fictional 30-day return policy, a follow-up support-contact question,
+and refusal of an unsupported annual-revenue question. It also checks retrieved
+context for the first two questions. Checks are heuristic and can reject a valid
+paraphrase; three passes are a smoke test, not a general faithfulness benchmark
+or a UI/browser test. Live verification remains pending until a successful run.
+
+The workflow makes real embedding and chat API calls, which may consume account
+credits. It runs only on manual dispatch, with read-only repository permissions.
+The key is exposed only to credential checks and the live test via environment
+variables. No raw answers, API exceptions, or credentials are intentionally logged.
+Do not commit the key. Model availability and rate limits can cause a failed run.
+
+For a local run with `MISTRAL_API_KEY` already set in your environment:
+`python scripts/live_rag_smoke.py`.
+
 ## Repository structure
 
 ```text
