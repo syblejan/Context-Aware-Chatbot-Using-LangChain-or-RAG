@@ -2,7 +2,7 @@
 
 A **document-grounded conversational chatbot prototype** using Streamlit, Mistral AI, FAISS and LangChain's history-aware retriever. Upload a UTF-8 text document, ask follow-up questions and retrieve contextual answers.
 
-> **Status:** Clean, independent app and offline helper tests added. Live Mistral API inference still requires an API key, credits and an available model. Results from live RAG interactions are **not independently benchmarked**.
+> **Status:** Live Mistral RAG smoke test passed: 3/3 sample checks, plus all 8 offline helper tests and Python syntax checks. [Verified GitHub Actions run](https://github.com/syblejan/Context-Aware-Chatbot-Using-LangChain-or-RAG/actions/runs/38791545021) on October 15, 2026 (UTC). This is a limited functional check, not an independent quality benchmark or a browser UI test.
 
 ## Architecture
 
@@ -44,7 +44,7 @@ python -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
-In the Streamlit sidebar, enter a valid **Mistral API key**, and optionally upload a plain-text document. Model name `open-mistral-nemo` is an example of a Mistral model identifier; service availability, account eligibility and pricing can change. Set it to a supported model in `app.py` if needed.
+In the Streamlit sidebar, enter a valid **Mistral API key**, and optionally upload a plain-text document. Model name `open-mistral-nemo` is an example of a Mistral model identifier; service availability, account eligibility and pricing can change. Set it to a supported model in `rag_chain.py` if needed.
 
 ### Offline tests
 
@@ -66,7 +66,21 @@ It checks the fictional 30-day return policy, a follow-up support-contact questi
 and refusal of an unsupported annual-revenue question. It also checks retrieved
 context for the first two questions. Checks are heuristic and can reject a valid
 paraphrase; three passes are a smoke test, not a general faithfulness benchmark
-or a UI/browser test. Live verification remains pending until a successful run.
+or a UI/browser test.
+
+### Verified live run
+
+[Run 38791545021](https://github.com/syblejan/Context-Aware-Chatbot-Using-LangChain-or-RAG/actions/runs/38791545021) completed successfully on October 15, 2026 (UTC), using real Mistral embedding and chat calls on commit `a229e9284cfe92172ec20bbec54d949145b31e92`.
+
+| Check | Result |
+|---|---|
+| Return-policy answer and retrieved 30-day context | PASS |
+| Follow-up support-contact answer and retrieved email | PASS |
+| Unsupported annual-revenue question: unknown-answer heuristic | PASS |
+| Offline helper tests | 8/8 passed |
+| Python compilation | Passed |
+
+The logs record pass/fail assertions rather than raw model responses. This run validates the shared app chain on the fictional default document; it does not measure general answer accuracy, isolate the benefit of memory, or verify the Streamlit browser interface.
 
 The workflow makes real embedding and chat API calls, which may consume account
 credits. It runs only on manual dispatch, with read-only repository permissions.
@@ -82,10 +96,16 @@ For a local run with `MISTRAL_API_KEY` already set in your environment:
 ```text
 .
 ├── app.py
+├── rag_chain.py
 ├── rag_utils.py
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
+├── scripts/
+│   └── live_rag_smoke.py
+├── .github/workflows/
+│   ├── offline-checks.yml
+│   └── live-rag.yml
 ├── notebooks/
 │   └── original_context_aware_rag.ipynb
 ├── assets/
